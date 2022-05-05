@@ -61,7 +61,7 @@ function Get-Application
     );
     
     Write-Host "Get-Application";
-    return HttpGet -Path "api/application/$Shortcode";
+    return HttpGet -Path "/api/application/$Shortcode";
 }
 
 function Organisation-Search
