@@ -4,7 +4,7 @@
 
 Select-Target -Deployment "localhost";  # blue, releasetest, red, localhost etc.
 $ssoToken = Get-SsoToken -LoginAs Kyp -Username "john@pass.com" -Password "Smegma123!";
-$appId = "XNXT0QQZ";
+$appId = "1CH49CNM"; # "4WV324M4";
 $appData = Get-Application $appId;
 # app must be PA std/pro1/2/3, consented by the applicant and form completed but not actually submitted
 $body = @"
@@ -24,10 +24,23 @@ $body = @"
       "city": "SOMERSET",
       "postcode": "BA1 1AB",
       "country": "GB"
-    }
+    },
+    "previousAddresses":[
+
+    ]
   },
   "checks": {
-    "dbsBasic": {
+    "nationalInsurance": {
+      "number": "AB123456C"
+    },
+    "identity": {
+      "currentAddressStartDate": "2000-01-01",
+      "previousAddresses":[
+        
+      ]
+    },
+    "dbsStandardAndEnhanced": {
+      "birthNationality": "British",
       "currentAddressStartDate": "2000-01-01",
       "previousAddresses": [],
       "previousNames": {},
@@ -68,6 +81,7 @@ $body = @"
       "currentAddressVerified": true,
       "dateOfAddressCheck": "2022-05-03",
       "identityVerified": true,
+      "fraudDetected": false,
       "verifyingOrganisation": "Yoti Ltd.",
       "passport": {
         "dateOfBirth": "1991-01-01",
@@ -81,6 +95,37 @@ $body = @"
         "dateOfIssue": "2020-01-01",
         "countryOfIssue": "GB"
       }
+    },
+    "digitalRightToWork": {    
+      "levelOfAssurance": {
+        "level": "M1A",
+        "policy": "GPG45"
+      },
+      "verifyingOrganisation": "Yoti Ltd.",
+      "nationality": "British",
+      "_shareCode": "SHARE1234",
+      "fraudDetected": false, 
+      "classification": "ListA",
+      "documents": [
+        { 
+          "documentType": "PassportBritishCitizen",
+          "expiryDate": "2099-01-01",
+          "documentNumber": "12345678",
+          "dateOfBirth": "1991-01-01",
+          "fullName": "JOHN",
+          "lastName": "PASS",
+          "fileId": "CC478A1B-25F6-44F9-AB2A-C9B5B27AB9F6"
+        },
+        { 
+          "documentType": "BirthCertificateUK",
+          "dateOfBirth": "1991-01-01",
+          "fullName": "JOHN",
+          "lastName": "PASS",
+          "nationality": "British",
+          "placeOfBirth": "London",
+          "fileId": "5E1DDE5D-EEE8-4272-A16F-42EC48BC8EBE"
+        },
+      ]
     }
   }
 }
@@ -103,16 +148,20 @@ $vdBody = @"
       "countryOfIssue": "GB",
       "drivingLicenceNumber": "PASS9901011J99ZU",
       "validFromDate": "2020-01-01"
+    },
+    {
+      "document": "Group1_BirthCertificate",
+      "issueDate": "1991-01-02",
     }
   ],
   "routeName": "route1",
-  "guidelineVersion": "DbsBasicV1",
+  "guidelineVersion": "DbsStandardAndEnhancedV2",
   "ukNational": true,
   "dateOfBirth": "1991-01-01"
 }
 "@;
-$x = HttpPut -Path "/api/application/${appId}/verification-documents/dbs-basic" -Body $vdBody
+$x = HttpPut -Path "/api/application/${appId}/verification-documents/dbs-enhanced" -Body $vdBody
+$x;
 
 $x = HttpPost -Path "/api/application/${appId}" -Body $body;
-$x.result;
-
+$x; #.result
