@@ -2,10 +2,6 @@
 . "..\include\_Internal_Api.ps1";
 . "..\include\_TestTools.ps1";
 
-Select-Target -Deployment "localhost";  # blue, releasetest, red, localhost etc.
-$ssoToken = Get-SsoToken -LoginAs Kyp -Username "john@pass.com" -Password "Smegma123!";
-$appId = "8VRXQQC4"; # "B89ES5HE";
-$appData = Get-Application $appId;
 # app must be PA std/pro1/2/3, consented by the applicant and form completed but not actually submitted
 $body = @"
 {
@@ -57,7 +53,7 @@ $body = @"
     },
     "digitalIdentity": {
       "levelOfAssurance": {
-        "level": "M1A",
+        "level": "L1A",
         "policy": "GPG45"
       },
       "authentication": {
@@ -90,27 +86,39 @@ $body = @"
       },
       "verifyingOrganisation": "Yoti Ltd.",
       "nationality": "British",
-      "shareCode": "SHARE1234",
+      "_shareCode": "SHARE1234",
       "fraudDetected": false, 
       "classification": "ListA",
       "documents": [
         { 
           "documentType": "PassportBritishCitizen",
+          "fileId": "270091EE-9A53-4EBF-AA52-7FC8A1A10990",
           "expiryDate": "2099-01-01",
           "documentNumber": "12345678",
           "dateOfBirth": "1991-01-01",
           "fullName": "JOHN",
           "lastName": "PASS",
-          "fileId": "CC478A1B-25F6-44F9-AB2A-C9B5B27AB9F6"
+
+          "countryOfIssue": "GB",
+          "issueDate": "2020-01-02",
+          "documentNumber": "123456789",
+          "chipDigitalSignatureVerified": true,
+          "automatedFaceMatch": true,
         },
         { 
           "documentType": "BirthCertificateUK",
-          "dateOfBirth": "1991-01-01",
+          "fileId": "270091EE-9A53-4EBF-AA52-7FC8A1A10990",
+          
+          "countryOfIssue": "GB",
+          "expiryDate": "2099-01-01",
+          "issueDate": "1991-01-02",
+          "documentNumber": "12345",
+
           "fullName": "JOHN",
           "lastName": "PASS",
+          "dateOfBirth": "1991-01-01",
           "nationality": "British",
           "placeOfBirth": "London",
-          "fileId": "5E1DDE5D-EEE8-4272-A16F-42EC48BC8EBE"
         },
       ]
     }
@@ -143,6 +151,12 @@ $vdBody = @"
   "dateOfBirth": "1991-01-01"
 }
 "@;
+
+Select-Target -Deployment "indigo"; # "localhost";  # blue, releasetest, red, localhost etc.
+$appId = "ARBDEY6V";
+$applicantSsoToken = Get-SsoToken -LoginAs Kyp -Username "john1@test.com" -Password "P@55w0rd";
+$appData = Get-Application $appId;
+
 $x = HttpPut -Path "/api/application/${appId}/verification-documents/dbs-basic" -Body $vdBody
 $x;
 

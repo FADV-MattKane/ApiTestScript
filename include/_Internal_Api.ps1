@@ -1,5 +1,5 @@
-. "..\include\_http.ps1";
-. "..\include\_kyp.ps1";
+. "$PSScriptRoot\_http.ps1";
+. "$PSScriptRoot\_kyp.ps1";
 
 if (Test-Path Function:\Create-User)
 {

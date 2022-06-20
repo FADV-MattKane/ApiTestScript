@@ -15,7 +15,7 @@ function _http {
 
         [Parameter(Mandatory)]
         [ValidateSet('GET','POST', 'PUT', 'DELETE')]
-        [string] $Verb = 'Get',
+        [string] $Verb,
 
         [Parameter()] 
         [object] $Body = $null,
@@ -28,9 +28,11 @@ function _http {
 
         [Parameter()] [string] $ContentType = "application/json",
         
-        [Parameter()] [bool] $UpdateConcurrencyToken = 1
+        [Parameter()] [bool] $UpdateConcurrencyToken = 1,
+        
+        [Parameter()] [string] $OutputContentType = "application/json"
     );
-
+    
     $headers = @{ 
         "Authorization" = "Bearer $SsoToken"; 
         "x-concurrency-token" = "$ConcurrencyToken";
@@ -63,18 +65,22 @@ function _http {
                                      -ContentType $ContentType `
                                      -Headers $headers `
                                      -Body $Body; }
+    };
+
+    $contentObj = Switch ($OutputContentType) {
+        "application/json" { ConvertFrom-Json $([String]::new($response.Content)); }
+        default { $response.Content; }
     }
 
-    $contentObj = ConvertFrom-Json $([String]::new($response.Content));
     $correlationId = $response.Headers["correlation-id"];
-    
+
     if($UpdateConcurrencyToken -eq 1) 
     {
         $ConcurrencyToken = $response.Headers["x-concurrency-token"];
         $global:_ConcurrencyToken = $ConcurrencyToken;
         return @{ 
             statusCode = $response.StatusCode;
-            result = $contentObj; 
+            content = $contentObj; 
             concurrencyToken = $ConcurrencyToken;
             correlationId = $correlationId;
         };
@@ -83,12 +89,10 @@ function _http {
     {
         return @{ 
             statusCode = $response.StatusCode;
-            result = $contentObj; 
+            content = $contentObj; 
             correlationId = $correlationId;
         };
     }
-
-
 }
 
 function HttpGet
@@ -97,14 +101,23 @@ function HttpGet
         [Parameter(Mandatory)] [string] $Path,
         [Parameter()] [string] $SsoToken = $global:_SsoToken,
         [Parameter()] [string] $ConcurrencyToken = $global:_ConcurrencyToken,
-        [Parameter()] [string] $ContentType = "application/json"
+        [Parameter()] [string] $ContentType = "application/json",
+        [Parameter()] [switch] $Html
     );
-
-    return _http -Url "$global:_KypBaseUrl$Path" `
+    if ($Html -eq $false) {
+        return _http -Url "$global:_KypBaseUrl$Path" `
                  -Verb GET `
                  -SsoToken $SsoToken `
-                 -ConcurrencyToken = $ConcurrencyToken;
-    
+                 -ConcurrencyToken $ConcurrencyToken `
+                 -ContentType $ContentType;
+    } else {
+        return _http -Url "$global:_KypBaseUrl$Path" `
+                 -Verb GET `
+                 -SsoToken $SsoToken `
+                 -ConcurrencyToken $ConcurrencyToken `
+                 -ContentType $ContentType `
+                 -OutputContentType "application/html";
+    }
 }
 
 function HttpPost

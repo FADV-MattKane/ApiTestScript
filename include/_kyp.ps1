@@ -8,7 +8,8 @@ else
     Write-Host "Defining KYP internals";
 }
 
-. "..\include\_sso.ps1";
+. "$PSScriptRoot\_sso.ps1";
+$global:_ScriptRoot = (get-item $PSScriptRoot ).parent.FullName;
 
 $ErrorActionPreference = "Stop";
 
@@ -43,6 +44,11 @@ function Select-Target
     if ($Deployment -eq 'magenta') {
         $global:_CustomerId = 'D0FEB8A7-55FF-E711-80C2-00155D8CF4BB'; # magenta QA_CustB
         $global:_PersonId = '5DCBAC29-8C77-EC11-94F6-A04A5E5D73A6'; # magenta John Alert (applicant all@test.com)
+    }
+
+    if ($Deployment -eq 'indigo') {
+        $global:_CustomerId = 'A989818C-E814-EA11-828B-0004FFD750F7'; # indigo QACustomerAPI_1
+        $global:_PersonId = 'db5ae3bd-13e0-ec11-b47a-00155d07cbc0'; # magenta John pass (applicant john1@test.comm)
     }
     
     # if ($Deployment -eq 'blue') {

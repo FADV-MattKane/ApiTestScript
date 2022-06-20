@@ -8,7 +8,18 @@ else
     Write-Host "Defining SSO functions";
 }
 
-. "..\include\_http.ps1";
+. "$PSScriptRoot\_http.ps1";
+
+function Login-As
+{
+    param (
+        [Parameter(Mandatory)]
+        [string] $Token
+    );
+    
+    $global:_SsoToken = $token;
+    Write-Host "Set logged in user to token";
+}
 
 function Get-SsoToken
 {
@@ -40,9 +51,9 @@ function Get-SsoToken
                             password=$Password; 
                         } `
                         -UpdateConcurrencyToken 0 `
-                        -ErrorAction STOP).result.access_token;
+                        -ErrorAction STOP).content.access_token;
             
-            Write-Host "Successfully logged in for $LoginAs as $Username via password grant type";
+            Write-Host "Successfully obtained token '$t' for $LoginAs as $Username via password grant type";
             $t;
         }
         
@@ -57,9 +68,9 @@ function Get-SsoToken
                             grant_type="client_credentials";
                         } `
                         -UpdateConcurrencyToken 0 `
-                        -ErrorAction STOP).result.access_token;
+                        -ErrorAction STOP).content.access_token;
             
-            Write-Host "Successfully logged in for $LoginAs via client credentials grant type";
+            Write-Host "Successfully obtained token for $LoginAs via client credentials grant type";
             $t;
         }
         
@@ -74,9 +85,9 @@ function Get-SsoToken
                             grant_type="client_credentials";
                         } `
                         -UpdateConcurrencyToken 0 `
-                        -ErrorAction STOP).result.access_token;
+                        -ErrorAction STOP).content.access_token;
             
-            Write-Host "Successfully logged in for $LoginAs via client credentials grant type";
+            Write-Host "Successfully obtained token for $LoginAs via client credentials grant type";
             $t;
         }
 
@@ -85,6 +96,6 @@ function Get-SsoToken
         }
     }
     
-    $global:_SsoToken = $token;
+    Login-As $token;
     return $token;
 }
